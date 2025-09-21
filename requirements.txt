@@ -2,5 +2,6 @@ streamlit
 streamlit-option-menu
 streamlit[charts]
 scikit-learn
+underthesea
 
 
