@@ -9,7 +9,7 @@ scikit-learn
 squarify
 wordcloud
 underthesea
-gensim
+
 re
 pyvi
 plotly
