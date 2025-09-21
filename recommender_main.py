@@ -83,7 +83,7 @@ match choice:
         if submit:    
             st.markdown("**Kết quả tìm kiếm**")
             tab1, tab2, tab3, tab4 = st.tabs([":eye: Thông tin", ":gem: Insights",":stars: Đánh giá", ":link: Gợi ý khách sạn tương tự"],)
-            df_info_comments = modeling.word_analysis(df_info, df_comments)
+            #df_info_comments = modeling.word_analysis(df_info, df_comments)
             match w_search:
                 case "Khách sạn":
                     df = df_info[df_info["Hotel_Name"] == selected_company_info]
