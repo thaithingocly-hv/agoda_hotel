@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
-from underthesea import word_tokenize, pos_tag, sent_tokenize
+# from underthesea import word_tokenize, pos_tag, sent_tokenize
 import warnings
 from gensim import corpora, models, similarities
 import re
@@ -193,4 +193,5 @@ def search_by_string(df_text,search_str,unusing_words):
     recommend = df_sorted_search.head(6)
     return df_text.iloc[recommend.id.to_list()]
     
+
                     
