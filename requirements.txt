@@ -7,10 +7,10 @@ matplotlib
 seaborn
 scikit-learn
 wordcloud
-underthesea
 pyvi
 plotly
 gensim
 underthesea_core
+
 
 
