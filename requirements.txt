@@ -1,7 +1,15 @@
 streamlit
 streamlit-option-menu
 streamlit[charts]
+numpy
+pandas
+matplotlib
+seaborn
 scikit-learn
+wordcloud
 underthesea
+pyvi
+plotly
+gensim
 
 
