@@ -11,6 +11,8 @@ pyvi
 plotly
 gensim
 underthesea_core
+scipy
+
 
 
 
