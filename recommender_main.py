@@ -6,35 +6,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 
-import utils, modeling
-
+import func
 
 #DATA
-file_info = 'data/hotel_info.csv'
+file_info = 'models/cleaned_hotel_info.csv'
 file_comments = 'data/hotel_comments.csv'
 
 #PROCESSING
 df_comments = pd.read_csv(file_comments)
 df_info = pd.read_csv(file_info)
-### tiền xử lý
-# Thay dấu , thành . để chuyển về kiểu float
-cols = ['Total_Score','Location','Cleanliness','Service','Facilities','Value_for_money','Comfort_and_room_quality']
-for col in cols:
-    df_info[col] = df_info[col].replace(['', 'nan', 'No information'], np.nan)  # Thay chuỗi rỗng bằng NaN
-    df_info[col] = df_info[col].astype(str).str.replace(',', '.', regex=False)
-    df_info[col] = df_info[col].astype(float)
-    df_info[col] = df_info[col].fillna(df_info[col].mean()).round(1)  # Thay NaN bằng giá trị trung bình của cột
-
-# Thay các giá trị không hợp lệ trong cột 'Hotel_Rank', 'Hotel_Description'
-df_info['Hotel_Rank'] = df_info['Hotel_Rank'].replace(['No information'], '0 sao trên 5') 
-df_info['Hotel_Description'].fillna(df_info['Hotel_Name']+'-'+df_info['Hotel_Address'], inplace=True)
-##### end tiền xử lý #####
-
-df_insights = df_info.merge(df_comments, left_on='Hotel_ID', right_on='Hotel ID', how='left')
 
 #GUI
 st.set_page_config(page_title="Recommendation system", page_icon="img/logo.png", layout="wide")
-#secondaryBackgroundColor = toml.load(".streamlit/config.toml")['theme']['secondaryBackgroundColor']
+
 col1, col2 = st.columns([0.2, 0.7])
 with col1:
     st.image("img/agoda.svg", width=80)
@@ -76,14 +60,13 @@ match choice:
                     st.markdown(f"Your selected options: {selection}.")
 
                     #tùy ý chọn từ khóa
-                    i_search = st.text_input(":material/more: Bạn cần?","...")
+                    user_search = st.text_input(":material/more: Bạn cần?","...")
                 submit = st.button("Tìm kiếm", icon=":material/search:")
             #expander.button("Reset", type="primary")
                     
         if submit:    
             st.markdown("**Kết quả tìm kiếm**")
             tab1, tab2, tab3, tab4 = st.tabs([":eye: Thông tin", ":gem: Insights",":stars: Đánh giá", ":link: Gợi ý khách sạn tương tự"],)
-            #df_info_comments = modeling.word_analysis(df_info, df_comments)
             match w_search:
                 case "Khách sạn":
                     df = df_info[df_info["Hotel_Name"] == selected_company_info]
@@ -97,64 +80,58 @@ match choice:
                         st.subheader(f":rainbow[{selected_company_info}]")
                         col1,col2 = st.columns([0.2,0.8])
                         with col1:
-                            fig = utils.gauge_chart('Vị trí',df['Location'].values[0], 'blue')
+                            fig = func.gauge_chart('Vị trí',df['Location'].values[0], 'blue')
                             st.plotly_chart(fig)
-                            fig = utils.gauge_chart('Độ sạch',df['Cleanliness'].values[0], 'orange')
+                            fig = func.gauge_chart('Độ sạch',df['Cleanliness'].values[0], 'orange')
                             st.plotly_chart(fig)
-                            fig = utils.gauge_chart('Dịch vụ',df['Service'].values[0], 'pink')
+                            fig = func.gauge_chart('Dịch vụ',df['Service'].values[0], 'pink')
                             st.plotly_chart(fig)
-                            fig = utils.gauge_chart('Tiện ích',df['Facilities'].values[0], 'green')
+                            fig = func.gauge_chart('Tiện ích',df['Facilities'].values[0], 'green')
                             st.plotly_chart(fig)
-                            fig = utils.gauge_chart('Đáng giá',df['Value_for_money'].values[0], 'yellow')
+                            fig = func.gauge_chart('Đáng giá',df['Value_for_money'].values[0], 'yellow')
                             st.plotly_chart(fig)
-                            fig = utils.gauge_chart('Chất lượng',df['Comfort_and_room_quality'].values[0], 'purple')
+                            fig = func.gauge_chart('Chất lượng',df['Comfort_and_room_quality'].values[0], 'purple')
                             st.plotly_chart(fig)
                         with col2:
                             st.markdown("<div style='text-align: center'>Quốc tịch</div>", unsafe_allow_html=True)
                             df_hotel_comments = df_comments[df_comments["Hotel ID"]== hotel_id]
                             fig = px.funnel(df_hotel_comments['Nationality'].value_counts())
                             st.plotly_chart(fig)
-                               
                     with tab3:
                         st.subheader(f":rainbow[{selected_company_info}]")
                         x = f"Số lượng người đánh giá: {df['comments_count'].values[0]}"
                         st.badge(x, color='primary', width=200)
                         
-                        df_text = modeling.word_analysis(df, df_hotel_comments)
-                        fig = modeling.word_visual(df_text.Content_cleaned)
+                        #get hình wordcloud
+                        df_text = func.word_analysis(df, df_hotel_comments)
+                        fig = func.word_visual(df_text.Content_cleaned)
                         st.pyplot(fig)
-                        st.cache_data.clear()
-                        
                     with tab4:
+                        st.write("Các khách sạn tương tự:")
                         st.subheader(f":rainbow[{selected_company_info}]")
-                        df_info_comments = modeling.word_analysis(df_info, df_comments)
-                        
-                        unusing_words = ['']
-                        cosine_sim = modeling.contentbased_filtering(df_info_comments,'cosine',unusing_words)
-                        
-                        df_recommendations = modeling.get_recommendations(df_info,hotel_id,cosine_sim=cosine_sim, nums=6)
+                        df_recommendations = func.get_recommendations(df_info,hotel_id, 6)
                         #st.dataframe(df_recommendations)
                         row1 = st.columns(3)
                         row2 = st.columns(3)
                         i = 0
                         for col in row1 + row2:
-                            with col.expander(df_recommendations['Hotel_Name'].iloc[i]):
+                            with col.expander(df_recommendations['Hotel_Name'].iloc[i][:25]):
                                 st.write(f"Hạng: {df_recommendations['Hotel_Rank'].iloc[i]} :star:")
-                            i=i+1
-                        st.cache_data.clear()
+                            i+=1
+
                 case "Hạng sao":
                     pass
                 case "Từ tìm kiếm":
-                    df_info_comments = modeling.word_analysis(df_info, df_comments)
                     # Trường hợp khách hàng nhập thông tin tìm kếm.
-                    search_str = selection.append(i_search)
+                    st.write(f'từ được chọn từ ví dụ: {selection}')
+                    st.write(f'từ khóa được nhập: {user_search}')
+                    search_str = selection.append(user_search)
                     st.write("Từ khóa cần tìm",search_str)
                     # HV cần xử lý chi tiết phần này
                     # Ở đây xem như search_str đã được tiền xử lý
-                    unusing_words = ['!','*','?','>']
-                    df = modeling.search_by_string(df_info_comments,search_str,unusing_words)
+                    df = func.search_by_string(df_info,search_str)
                     st.dataframe(df)
-                    st.cache_data.clear()
+                    
                     
             
             

@@ -5,13 +5,5 @@ numpy
 pandas
 matplotlib
 seaborn
-scikit-learn
 wordcloud
-pyvi
 plotly
-gensim
-underthesea_core
-scipy==1.12.0
-
-
-
